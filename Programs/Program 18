@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <pthread.h>
+
+int counter = 0;
+int n;
+
+pthread_mutex_t lock;
+
+/* Thread 1 */
+void *increment1(void *arg)
+{
+    int i;
+
+    for (i = 0; i < n; i++) {
+        pthread_mutex_lock(&lock);
+
+        counter++;
+        printf("Thread 1: Counter = %d\n", counter);
+
+        pthread_mutex_unlock(&lock);
+    }
+
+    pthread_exit(NULL);
+}
+
+/* Thread 2 */
+void *increment2(void *arg)
+{
+    int i;
+
+    for (i = 0; i < n; i++) {
+        pthread_mutex_lock(&lock);
+
+        counter++;
+        printf("Thread 2: Counter = %d\n", counter);
+
+        pthread_mutex_unlock(&lock);
+    }
+
+    pthread_exit(NULL);
+}
+
+int main()
+{
+    pthread_t t1, t2;
+
+    printf("Enter number of increments for each thread: ");
+    scanf("%d", &n);
+
+    if (n <= 0) {
+        printf("Enter a positive number.\n");
+        return 1;
+    }
+
+    /* Initialize mutex */
+    pthread_mutex_init(&lock, NULL);
+
+    /* Create two threads */
+    pthread_create(&t1, NULL, increment1, NULL);
+    pthread_create(&t2, NULL, increment2, NULL);
+
+    /* Wait for threads to complete */
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    /* Destroy mutex */
+    pthread_mutex_destroy(&lock);
+
+    printf("\nFinal Counter Value = %d\n", counter);
+return 0;
+}
+
+OUTPUT:
+
+Enter number of increments for each thread: 5
+Thread 1: Counter = 1
+Thread 1: Counter = 2
+Thread 1: Counter = 3
+Thread 1: Counter = 4
+Thread 1: Counter = 5
+Thread 2: Counter = 6
+Thread 2: Counter = 7
+Thread 2: Counter = 8
+Thread 2: Counter = 9
+Thread 2: Counter = 10
+
+Final Counter Value = 10
