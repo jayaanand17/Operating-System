@@ -1,0 +1,124 @@
+#include <stdio.h>
+
+int main() {
+    int b[20], p[20];
+    int m, n, i, j, choice;
+    int allocation[20];
+
+    printf("Enter number of memory blocks: ");
+    scanf("%d", &m);
+
+    printf("Enter size of each memory block:\n");
+    for(i = 0; i < m; i++)
+        scanf("%d", &b[i]);
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    printf("Enter size of each process:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &p[i]);
+
+    printf("\nChoose Allocation Strategy:\n");
+    printf("1. First Fit\n");
+    printf("2. Best Fit\n");
+    printf("3. Worst Fit\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    for(i = 0; i < n; i++)
+        allocation[i] = -1;
+
+    switch(choice) {
+
+    case 1: // First Fit
+        for(i = 0; i < n; i++) {
+            for(j = 0; j < m; j++) {
+                if(b[j] >= p[i]) {
+                    allocation[i] = j;
+                    b[j] -= p[i];
+                    break;
+                }
+            }
+        }
+        break;
+
+    case 2: // Best Fit
+        for(i = 0; i < n; i++) {
+            int best = -1;
+            for(j = 0; j < m; j++) {
+                if(b[j] >= p[i]) {
+                    if(best == -1 || b[j] < b[best])
+                        best = j;
+                }
+            }
+            if(best != -1) {
+                allocation[i] = best;
+                b[best] -= p[i];
+            }
+        }
+        break;
+
+    case 3: // Worst Fit
+        for(i = 0; i < n; i++) {
+            int worst = -1;
+            for(j = 0; j < m; j++) {
+                if(b[j] >= p[i]) {
+                    if(worst == -1 || b[j] > b[worst])
+                        worst = j;
+                }
+            }
+            if(worst != -1) {
+                allocation[i] = worst;
+                b[worst] -= p[i];
+            }
+        }
+        break;
+
+    default:
+        printf("Invalid Choice\n");
+        return 0;
+    }
+
+    printf("\nProcess\tProcess Size\tBlock Allocated\n");
+    for(i = 0; i < n; i++) {
+        if(allocation[i] != -1)
+            printf("P%d\t%d\t\tBlock %d\n",
+                   i + 1, p[i], allocation[i] + 1);
+        else
+            printf("P%d\t%d\t\tNot Allocated\n",
+                   i + 1, p[i]);
+    }
+
+    return 0;
+}
+
+
+
+
+OUPUT:
+Enter number of memory blocks: 5
+Enter size of each memory block:
+100
+500
+200
+300
+600
+Enter number of processes: 4
+Enter size of each process:
+21  212
+417
+122
+426
+
+Choose Allocation Strategy:
+1. First Fit
+2. Best Fit
+3. Worst Fit
+Enter your choice: 1
+
+Process	Process Size	Block Allocated
+P1	212		Block 2
+P2	417		Block 5
+P3	122		Block 2
+P4	426		Not Allocated
