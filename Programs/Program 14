@@ -1,0 +1,131 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Employee {
+    int id;
+    char name[30];
+    float salary;
+};
+
+int main() {
+    FILE *fp;
+    struct Employee emp;
+    int choice, record, n, i;
+
+    fp = fopen("employee.dat", "wb+");
+
+    if (fp == NULL) {
+        printf("Unable to open file.\n");
+        return 1;
+    }
+
+    while (1) {
+        printf("\n===== EMPLOYEE RECORD SYSTEM =====\n");
+        printf("1. Add Employee Records\n");
+        printf("2. Display Employee Using Random Access\n");
+        printf("3. Display All Employees\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+
+        case 1:
+            printf("Enter number of employees: ");
+            scanf("%d", &n);
+
+            for (i = 0; i < n; i++) {
+                printf("\nEnter details for Employee %d\n", i + 1);
+
+                printf("Employee ID: ");
+                scanf("%d", &emp.id);
+
+                printf("Employee Name: ");
+                scanf("%s", emp.name);
+
+                printf("Employee Salary: ");
+                scanf("%f", &emp.salary);
+
+                fwrite(&emp, sizeof(struct Employee), 1, fp);
+            }
+
+            printf("\nEmployee records added successfully.\n");
+            break;
+
+        case 2:
+            printf("Enter employee record number to access: ");
+            scanf("%d", &record);
+
+            if (record <= 0) {
+                printf("Invalid record number.\n");
+                break;
+            }
+
+            /*
+             * Move file pointer directly to the
+             * required employee record.
+             */
+            if (fseek(fp,
+                      (record - 1) * sizeof(struct Employee),
+                      SEEK_SET) != 0) {
+                printf("Unable to access record.\n");
+                break;
+            }
+
+            if (fread(&emp, sizeof(struct Employee), 1, fp) == 1) {
+                printf("\nEmployee Details\n");
+                printf("-------------------------\n");
+                printf("Employee ID     : %d\n", emp.id);
+                printf("Employee Name   : %s\n", emp.name);
+                printf("Employee Salary : %.2f\n", emp.salary);
+            } else {
+                printf("Record does not exist.\n");
+            }
+            break;
+
+        case 3:
+            rewind(fp);
+
+            printf("\n===== ALL EMPLOYEE RECORDS =====\n");
+
+            while (fread(&emp, sizeof(struct Employee), 1, fp) == 1) {
+                printf("\nEmployee ID     : %d\n", emp.id);
+                printf("Employee Name   : %s\n", emp.name);
+                printf("Employee Salary : %.2f\n", emp.salary);
+            }
+            break;
+
+        case 4:
+            fclose(fp);
+            printf("Exiting program...\n");
+            return 0;
+
+        default:
+            printf("Invalid choice.\n");
+        }
+    }
+
+    return 0;
+}
+
+OUTPUT:
+
+===== EMPLOYEE RECORD SYSTEM =====
+1. Add Employee Records
+2. Display Employee Using Random Access
+3. Display All Employees
+4. Exit
+Enter your choice: 1
+Enter number of employees: 2
+
+Enter details for Employee 1
+Employee ID: 101
+Employee Name: PRIYA
+Employee Salary: 30000
+
+Enter details for Employee 2
+Employee ID: 102
+Employee Name: DHANUSH
+Employee Salary: 500000
+
+Employee records added successfully.
