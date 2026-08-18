@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+int data = 0;
+int read_count = 0;
+int n;
+
+sem_t mutex;
+sem_t write_lock;
+
+/* Reader function */
+void *reader(void *arg)
+{
+    int id = *(int *)arg;
+
+    /* Protect read_count */
+    sem_wait(&mutex);
+    read_count++;
+
+    if (read_count == 1)
+        sem_wait(&write_lock);
+
+    sem_post(&mutex);
+
+    printf("Reader %d is reading data = %d\n", id, data);
+    sleep(1);
+
+    /* Reader finished */
+    sem_wait(&mutex);
+    read_count--;
+
+    if (read_count == 0)
+        sem_post(&write_lock);
+
+    sem_post(&mutex);
+
+    pthread_exit(NULL);
+}
+
+/* Writer function */
+void *writer(void *arg)
+{
+    int id = *(int *)arg;
+
+    sem_wait(&write_lock);
+
+    data++;
+    printf("Writer %d is writing data = %d\n", id, data);
+    sleep(1);
+
+    sem_post(&write_lock);
+
+    pthread_exit(NULL);
+}
+
+int main()
+{
+    pthread_t readers[20], writers[20];
+    int r_id[20], w_id[20];
+    int i;
+
+    printf("Enter number of readers and writers: ");
+    scanf("%d", &n);
+
+    if (n <= 0 || n > 20) {
+        printf("Enter a number between 1 and 20.\n");
+        return 1;
+    }
+
+    /* Initialize semaphores */
+    sem_init(&mutex, 0, 1);
+    sem_init(&write_lock, 0, 1);
+
+    /* Create readers and writers */
+    for (i = 0; i < n; i++) {
+        r_id[i] = i + 1;
+        w_id[i] = i + 1;
+
+        pthread_create(&readers[i], NULL, reader, &r_id[i]);
+        pthread_create(&writers[i], NULL, writer, &w_id[i]);
+    }
+
+    /* Wait for all readers and writers */
+    for (i = 0; i < n; i++) {
+        pthread_join(readers[i], NULL);
+        pthread_join(writers[i], NULL);
+    }
+
+    /* Destroy semaphores */
+    sem_destroy(&mutex);
+    sem_destroy(&write_lock);
+
+    printf("\nReader-Writer execution completed.\n");
+    printf("Final data value = %d\n", data);
+
+    return 0;
+}
+
+OUTPUT:
+Enter number of readers and writers: 3
+Writer 1 is writing data = 1
+Reader 1 is reading data = 1
+Reader 2 is reading data = 1
+Reader 3 is reading data = 1
+Writer 3 is writing data = 2
+Writer 2 is writing data = 3
+
+Reader-Writer execution completed.
+Final data value = 3
