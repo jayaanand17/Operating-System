@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/wait.h>
+
+int main() {
+    int shmid;
+    char *shared_memory;
+
+    // Create shared memory
+    shmid = shmget(IPC_PRIVATE, 1024, IPC_CREAT | 0666);
+
+    if (shmid < 0) {
+        printf("Shared memory creation failed.\n");
+        return 1;
+    }
+
+    if (fork() == 0) {
+        // Child Process (Reader)
+        sleep(1);   // Wait for parent to write
+
+        shared_memory = (char *)shmat(shmid, NULL, 0);
+
+        printf("\nChild Process Reading:\n");
+        printf("Message: %s\n", shared_memory);
+
+        shmdt(shared_memory);
+    }
+    else {
+        // Parent Process (Writer)
+        shared_memory = (char *)shmat(shmid, NULL, 0);
+
+        printf("Enter a message: ");
+        scanf(" %[^\n]", shared_memory);
+
+        wait(NULL);
+
+        shmdt(shared_memory);
+        shmctl(shmid, IPC_RMID, NULL);
+    }
+
+    return 0;
+}
+
+
+
+
+OUTPUT:
+Compiled Successfully. memory: 3328 time: 0.03 exit code: 0Child Process Reading from Shared Memory:
+Hello from Parent Process using Shared Memory!
