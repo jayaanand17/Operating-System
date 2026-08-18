@@ -1,0 +1,260 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_USERS 10
+#define MAX_FILES 20
+#define NAME 30
+
+struct User {
+    char username[NAME];
+    char files[MAX_FILES][NAME];
+    int fileCount;
+};
+
+struct User users[MAX_USERS];
+int userCount = 0;
+
+int findUser(char username[]) {
+    int i;
+
+    for (i = 0; i < userCount; i++) {
+        if (strcmp(users[i].username, username) == 0)
+            return i;
+    }
+
+    return -1;
+}
+
+int findFile(int userIndex, char filename[]) {
+    int i;
+
+    for (i = 0; i < users[userIndex].fileCount; i++) {
+        if (strcmp(users[userIndex].files[i], filename) == 0)
+            return i;
+    }
+
+    return -1;
+}
+
+int main() {
+    int choice, u, f, i;
+    char username[NAME];
+    char filename[NAME];
+
+    while (1) {
+        printf("\n===== TWO LEVEL DIRECTORY =====\n");
+        printf("1. Create User\n");
+        printf("2. Create File\n");
+        printf("3. List Files\n");
+        printf("4. Search File\n");
+        printf("5. Delete File\n");
+        printf("6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+
+        case 1:
+            if (userCount >= MAX_USERS) {
+                printf("Maximum number of users reached.\n");
+                break;
+            }
+
+            printf("Enter username: ");
+            scanf("%s", username);
+
+            if (findUser(username) != -1) {
+                printf("User already exists.\n");
+            } else {
+                strcpy(users[userCount].username, username);
+                users[userCount].fileCount = 0;
+                userCount++;
+
+                printf("User created successfully.\n");
+            }
+            break;
+
+        case 2:
+            printf("Enter username: ");
+            scanf("%s", username);
+
+            u = findUser(username);
+
+            if (u == -1) {
+                printf("User not found.\n");
+                break;
+            }
+
+            if (users[u].fileCount >= MAX_FILES) {
+                printf("Directory is full.\n");
+                break;
+            }
+
+            printf("Enter file name: ");
+            scanf("%s", filename);
+
+            if (findFile(u, filename) != -1) {
+                printf("File already exists for this user.\n");
+            } else {
+                strcpy(users[u].files[users[u].fileCount], filename);
+                users[u].fileCount++;
+
+                printf("File created successfully.\n");
+            }
+            break;
+
+        case 3:
+            printf("Enter username: ");
+            scanf("%s", username);
+
+            u = findUser(username);
+
+            if (u == -1) {
+                printf("User not found.\n");
+            } else if (users[u].fileCount == 0) {
+                printf("Directory is empty.\n");
+            } else {
+                printf("\nFiles of user %s:\n", username);
+
+                for (i = 0; i < users[u].fileCount; i++) {
+                    printf("%d. %s\n",
+                           i + 1, users[u].files[i]);
+                }
+            }
+            break;
+
+        case 4:
+            printf("Enter username: ");
+            scanf("%s", username);
+
+            u = findUser(username);
+
+            if (u == -1) {
+                printf("User not found.\n");
+                break;
+            }
+
+            printf("Enter file name to search: ");
+            scanf("%s", filename);
+
+            f = findFile(u, filename);
+
+            if (f != -1)
+                printf("File '%s' found in %s's directory.\n",
+                       filename, username);
+            else
+                printf("File '%s' not found.\n", filename);
+
+            break;
+
+        case 5:
+            printf("Enter username: ");
+            scanf("%s", username);
+
+            u = findUser(username);
+
+            if (u == -1) {
+                printf("User not found.\n");
+                break;
+            }
+
+            printf("Enter file name to delete: ");
+            scanf("%s", filename);
+
+            f = findFile(u, filename);
+
+            if (f == -1) {
+                printf("File not found.\n");
+            } else {
+                for (i = f; i < users[u].fileCount - 1; i++) {
+                    strcpy(users[u].files[i],
+                           users[u].files[i + 1]);
+                }
+
+                users[u].fileCount--;
+
+                printf("File deleted successfully.\n");
+            }
+            break;
+
+        case 6:
+            printf("Exiting program...\n");
+            return 0;
+
+        default:
+            printf("Invalid choice!\n");
+        }
+    }
+
+    return 0;
+}
+
+OUTPUT:
+
+===== TWO LEVEL DIRECTORY =====
+1. Create User
+2. Create File
+3. List Files
+4. Search File
+5. Delete File
+6. Exit
+Enter your choice: 1
+Enter username: ALICE     ALICE
+User created successfully.
+
+===== TWO LEVEL DIRECTORY =====
+1. Create User
+2. Create File
+3. List Files
+4. Search File
+5. Delete File
+6. Exit
+Enter your choice: 1
+Enter username: BOB
+User created successfully.
+
+===== TWO LEVEL DIRECTORY =====
+1. Create User
+2. Create File
+3. List Files
+4. Search File
+5. Delete File
+6. Exit
+Enter your choice: 2
+Enter username: ALICE
+Enter file name: NOTES.TXT
+File created successfully.
+
+===== TWO LEVEL DIRECTORY =====
+1. Create User
+2. Create File
+3. List Files
+4. Search File
+5. Delete File
+6. Exit
+Enter your choice: 2
+Enter username: BOB
+Enter file name: NOTES.TXT
+File created successfully.
+
+===== TWO LEVEL DIRECTORY =====
+1. Create User
+2. Create File
+3. List Files
+4. Search File
+5. Delete File
+6. Exit
+Enter your choice: 3
+Enter username: ALICE
+
+Files of user ALICE:
+1. NOTES.TXT
+
+===== TWO LEVEL DIRECTORY =====
+1. Create User
+2. Create File
+3. List Files
+4. Search File
+5. Delete File
+6. Exit
+Enter your choice: 
