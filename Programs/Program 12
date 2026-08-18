@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <pthread.h>
+
+int n;
+
+void *thread1(void *arg) {
+    int i;
+    printf("\nThread 1:\n");
+    for(i = 1; i <= n; i++)
+        printf("%d ", i);
+    pthread_exit(NULL);
+}
+
+void *thread2(void *arg) {
+    int i;
+    printf("\n\nThread 2:\n");
+    for(i = n; i >= 1; i--)
+        printf("%d ", i);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t t1, t2;
+
+    printf("Enter a number: ");
+    scanf("%d", &n);
+
+    pthread_create(&t1, NULL, thread1, NULL);
+    pthread_create(&t2, NULL, thread2, NULL);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    printf("\n\nBoth threads completed.\n");
+
+    return 0;
+}
+
+
+OUTPUT:
+Enter a number: 5
+
+Thread 1:
+1 2 3 4 5 
+
+Thread 2:
+5 4 3 2 1 
+
+Both threads completed.
